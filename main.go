@@ -20,6 +20,7 @@ func main() {
   // Use our own FlagSet, because some libraries pollute the global one
   var cmdLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
   configfile := cmdLine.String("c", "./" + Name + ".yml", "Configuration file")
+  publishDisabled := cmdLine.Bool("N", false, "Disable actual publishing for testing")
   printVersion := cmdLine.Bool("version", false, "Print version and exit")
 
   // Adds logging specific flags

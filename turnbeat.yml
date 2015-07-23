@@ -16,3 +16,19 @@ agent:
  # by the server on which the agent is installed. This option is useful
  # to remove duplicates if agents are installed on multiple servers.
  # ignore_outgoing: true
+
+############################# Output ############################################
+
+# Configure what outputs to use when sending the data collected by packetbeat.
+# You can enable one or multiple outputs by setting enabled option to true.
+output:
+
+  # Elasticsearch as output
+  # Options:
+  # host, port: where Elasticsearch is listening on
+  # save_topology: specify if the topology is saved in Elasticsearch
+  kafka:
+    enabled: true
+    host: "localhost:9092"
+    topic: "pipeline-input"
+
