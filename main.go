@@ -7,14 +7,22 @@ import (
   "os"
   "runtime"
   "gopkg.in/yaml.v2"
+  "github.com/johann8384/libbeat/common"
+  "github.com/johann8384/libbeat/common/droppriv"
   "github.com/johann8384/libbeat/publisher"
   "github.com/johann8384/libbeat/logp"
+  "github.com/johann8384/libbeat/filters"
+  "github.com/johann8384/libbeat/filters/nop"
   "github.com/turn/turnbeat/config"
 )
 
 // You can overwrite these, e.g.: go build -ldflags "-X main.Version 1.0.0-beta3"
 var Version = "0.0.1"
 var Name = "turnbeat"
+
+var EnabledFilterPlugins map[filters.Filter]filters.FilterPlugin = map[filters.Filter]filters.FilterPlugin{
+  filters.NopFilter: new(nop.Nop),
+}
 
 func main() {
   // Use our own FlagSet, because some libraries pollute the global one
@@ -54,5 +62,40 @@ func main() {
     os.Exit(1)
   }
 
+  logp.Debug("main", "Initializing filters plugins")
+  for filter, plugin := range EnabledFilterPlugins {
+    filters.Filters.Register(filter, plugin)
+  }
+  filters_plugins, err :=
+    LoadConfiguredFilters(config.ConfigSingleton.Filter)
+  if err != nil {
+    logp.Critical("Error loading filters plugins: %v", err)
+    os.Exit(1)
+  }
+  logp.Debug("main", "Filters plugins order: %v", filters_plugins)
+  var afterInputsQueue chan common.MapStr
+  if len(filters_plugins) > 0 {
+    runner := NewFilterRunner(publisher.Publisher.Queue, filters_plugins)
+    go func() {
+      err := runner.Run()
+      if err != nil {
+        logp.Critical("Filters runner failed: %v", err)
+      }
+    }()
+    afterInputsQueue = runner.FiltersQueue
+  } else {
+    // short-circuit the runner
+    afterInputsQueue = publisher.Publisher.Queue
+  }
+
+  if err = droppriv.DropPrivileges(config.ConfigSingleton.RunOptions); err != nil {
+    logp.Critical(err.Error())
+    os.Exit(1)
+  }
+
   logp.Info("TurnBeat Started")
+  for {
+    event := <-afterInputsQueue
+    logp.Info("Event: %v", event)
+  }
 }
