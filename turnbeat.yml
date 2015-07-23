@@ -19,16 +19,23 @@ agent:
 
 ############################# Output ############################################
 
-# Configure what outputs to use when sending the data collected by packetbeat.
+# Configure what outputs to use when sending the data collected by turnbeat.
 # You can enable one or multiple outputs by setting enabled option to true.
 output:
 
-  # Elasticsearch as output
-  # Options:
-  # host, port: where Elasticsearch is listening on
-  # save_topology: specify if the topology is saved in Elasticsearch
   kafka:
     enabled: true
     host: "localhost:9092"
     topic: "pipeline-input"
+
+############################# Input #############################################
+
+# Configure what inputs to use when collecting data with turnbeat.
+# You can enable one or multiple inputs by setting enabled option to true.
+input:
+
+  tcp:
+    enabled: true
+    port: 3845
+    type: "tcollector"
 

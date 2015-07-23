@@ -14,6 +14,7 @@ import (
   "github.com/johann8384/libbeat/filters"
   "github.com/johann8384/libbeat/filters/nop"
   "github.com/turn/turnbeat/config"
+  "github.com/turn/turnbeat/reader"
 )
 
 // You can overwrite these, e.g.: go build -ldflags "-X main.Version 1.0.0-beta3"
@@ -86,6 +87,13 @@ func main() {
   } else {
     // short-circuit the runner
     afterInputsQueue = publisher.Publisher.Queue
+  }
+
+  logp.Debug("main", "Initializing input plugins")
+  if err = reader.Reader.Init(config.ConfigSingleton.Input); err != nil {
+
+    logp.Critical(err.Error())
+    os.Exit(1)
   }
 
   if err = droppriv.DropPrivileges(config.ConfigSingleton.RunOptions); err != nil {
