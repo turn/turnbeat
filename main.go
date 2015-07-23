@@ -7,8 +7,9 @@ import (
   "os"
   "runtime"
   "gopkg.in/yaml.v2"
-  "github.com/elastic/libbeat/logp"
-  "github.com/elastic/packetbeat/config"
+  "github.com/johann8384/libbeat/publisher"
+  "github.com/johann8384/libbeat/logp"
+  "github.com/turn/turnbeat/config"
 )
 
 // You can overwrite these, e.g.: go build -ldflags "-X main.Version 1.0.0-beta3"
@@ -43,6 +44,14 @@ func main() {
   }
 
   logp.Init(Name, &config.ConfigSingleton.Logging)
+
+  logp.Debug("main", "Initializing output plugins")
+  if err = publisher.Publisher.Init(*publishDisabled, config.ConfigSingleton.Output,
+    config.ConfigSingleton.Shipper); err != nil {
+
+    logp.Critical(err.Error())
+    os.Exit(1)
+  }
 
   logp.Info("TurnBeat Started")
 }
