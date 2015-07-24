@@ -39,3 +39,6 @@ input:
     port: 3845
     type: "tcollector"
 
+filter:
+  opentsdb:
+    enabled: true

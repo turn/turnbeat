@@ -16,7 +16,8 @@ type MothershipConfig struct {
 type InputInterface interface {
   // Initialize the input plugin
   Init(config MothershipConfig) error
-
+  InputType() string
+  InputVersion() string
   // Run
   Run(chan common.MapStr) error
 }
@@ -26,7 +27,7 @@ type InputPlugin uint16
 
 // Input constants
 const (
-Unknowninput InputPlugin = iota
+  Unknowninput InputPlugin = iota
   FileInput
   StdInput
   TcpInput

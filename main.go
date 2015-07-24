@@ -13,6 +13,7 @@ import (
   "github.com/johann8384/libbeat/logp"
   "github.com/johann8384/libbeat/filters"
   "github.com/johann8384/libbeat/filters/nop"
+  "github.com/johann8384/libbeat/filters/opentsdb"
   "github.com/turn/turnbeat/config"
   "github.com/turn/turnbeat/reader"
 )
@@ -23,6 +24,7 @@ var Name = "turnbeat"
 
 var EnabledFilterPlugins map[filters.Filter]filters.FilterPlugin = map[filters.Filter]filters.FilterPlugin{
   filters.NopFilter: new(nop.Nop),
+  filters.OpenTSDBFilter: new (opentsdb.OpenTSDB),
 }
 
 func main() {
@@ -38,7 +40,7 @@ func main() {
   cmdLine.Parse(os.Args[1:])
 
   if *printVersion {
-    fmt.Printf("Packetbeat version %s (%s)\n", Version, runtime.GOARCH)
+    fmt.Printf("Turnbeat version %s (%s)\n", Version, runtime.GOARCH)
     return
   }
 
@@ -55,7 +57,7 @@ func main() {
 
   logp.Init(Name, &config.ConfigSingleton.Logging)
 
-  logp.Debug("main", "Initializing output plugins")
+  logp.Info("Initializing output plugins")
   if err = publisher.Publisher.Init(*publishDisabled, config.ConfigSingleton.Output,
     config.ConfigSingleton.Shipper); err != nil {
 
@@ -63,17 +65,19 @@ func main() {
     os.Exit(1)
   }
 
-  logp.Debug("main", "Initializing filters plugins")
+  logp.Info("Initializing filter plugins")
   for filter, plugin := range EnabledFilterPlugins {
+    logp.Debug("main", "Registering Plugin: %s", filter)
     filters.Filters.Register(filter, plugin)
   }
+  logp.Debug("main", "Filter Config: %s", config.ConfigSingleton.Filter)
   filters_plugins, err :=
     LoadConfiguredFilters(config.ConfigSingleton.Filter)
   if err != nil {
-    logp.Critical("Error loading filters plugins: %v", err)
+    logp.Critical("Error loading filter plugins: %v", err)
     os.Exit(1)
   }
-  logp.Debug("main", "Filters plugins order: %v", filters_plugins)
+  logp.Debug("main", "Filter plugins order: %v", filters_plugins)
   var afterInputsQueue chan common.MapStr
   if len(filters_plugins) > 0 {
     runner := NewFilterRunner(publisher.Publisher.Queue, filters_plugins)
@@ -89,9 +93,8 @@ func main() {
     afterInputsQueue = publisher.Publisher.Queue
   }
 
-  logp.Debug("main", "Initializing input plugins")
+  logp.Info("Initializing input plugins")
   if err = reader.Reader.Init(config.ConfigSingleton.Input); err != nil {
-
     logp.Critical(err.Error())
     os.Exit(1)
   }
@@ -101,7 +104,13 @@ func main() {
     os.Exit(1)
   }
 
-  logp.Info("TurnBeat Started")
+  logp.Info("Starting input plugins")
+  if err = reader.Reader.Run(publisher.Publisher.Queue); err != nil {
+    logp.Critical(err.Error())
+    os.Exit(1)
+  }
+
+  logp.Info("Turnbeat Started")
   for {
     event := <-afterInputsQueue
     logp.Info("Event: %v", event)

@@ -58,3 +58,16 @@ func (reader *ReaderType) Init(inputs map[string]inputs.MothershipConfig) error 
 
   return nil
 }
+
+func (reader *ReaderType) Run(output chan common.MapStr) error {
+  for _, plugin := range reader.Input {
+    err := plugin.Run(output)
+    if err != nil {
+      logp.Err("Fail to start input plugin %s : %s", plugin.InputType, err)
+        return err
+    } else {
+      logp.Info("Started input plugin %s", plugin.InputType)
+    }
+  }
+  return nil
+}

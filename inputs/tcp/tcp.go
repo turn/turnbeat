@@ -44,6 +44,14 @@ type TcpInput struct {
   Type       string /* the type to add to events */
 }
 
+func (l *TcpInput) InputType() string {
+  return "TcpInput"
+}
+
+func (l *TcpInput) InputVersion() string {
+  return "0.0.1"
+}
+
 func (l *TcpInput) Init(config inputs.MothershipConfig) error {
 
   if config.Port == 0 {
