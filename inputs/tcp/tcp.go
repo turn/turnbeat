@@ -71,6 +71,7 @@ func (l *TcpInput) Init(config inputs.MothershipConfig) error {
 }
 
 func (l *TcpInput) Run(output chan common.MapStr) error {
+  logp.Debug("tcpinput", "Running TCP Input")
   server, err := net.Listen("tcp", ":" + strconv.Itoa(l.Port))
   if server == nil {
       panic("couldn't start listening: " + err.Error())
@@ -92,7 +93,7 @@ func clientConns(listener net.Listener) chan net.Conn {
                 continue
             }
             i++
-            logp.Info("%d: %v <-> %v\n", i, client.LocalAddr(), client.RemoteAddr())
+            logp.Debug("tcpinput", "%d: %v <-> %v\n", i, client.LocalAddr(), client.RemoteAddr())
             ch <- client
         }
     }()
@@ -108,6 +109,7 @@ func (l *TcpInput) handleConn(client net.Conn, output chan common.MapStr) {
     var line uint64 = 0
     var read_timeout = 10 * time.Second
 
+    logp.Debug("tcpinput", "Handling New Connection from %s", source)
 
     now := func() time.Time {
       t := time.Now()
@@ -121,6 +123,8 @@ func (l *TcpInput) handleConn(client net.Conn, output chan common.MapStr) {
           logp.Info("Unexpected state reading from %v; error: %s\n", client.RemoteAddr().String, err)
           return
         }
+
+        logp.Debug("tcpinputlines", "New Line: %s", &text)
 
         metric_data := metricExp.FindStringSubmatchMap(*text)
         parsed_tags := strings.Fields(metric_data["metric_tags"])
@@ -150,16 +154,19 @@ func (l *TcpInput) handleConn(client net.Conn, output chan common.MapStr) {
 
         offset += int64(bytesread)
 
-
+        logp.Debug("tcpinput", "InputEvent: %v", event)
         output <- event // ship the new event downstream
         client.Write([]byte("OK"))
     }
+    logp.Debug("tcpinput", "Closed Connection from %s", source)
 }
 
 func (l *TcpInput) readline(reader *bufio.Reader, buffer *bytes.Buffer, eof_timeout time.Duration) (*string, int, error) {
   var is_partial bool = true
   var newline_length int = 1
   start_time := time.Now()
+  
+  logp.Debug("tcpinputlines", "Readline Called")
 
   for {
     segment, err := reader.ReadBytes('\n')

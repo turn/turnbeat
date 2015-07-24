@@ -6,6 +6,7 @@ import (
   "io/ioutil"
   "os"
   "runtime"
+  "os/signal"
   "gopkg.in/yaml.v2"
   "github.com/johann8384/libbeat/common"
   "github.com/johann8384/libbeat/common/droppriv"
@@ -95,24 +96,40 @@ func main() {
 
   logp.Info("Initializing input plugins")
   if err = reader.Reader.Init(config.ConfigSingleton.Input); err != nil {
-    logp.Critical(err.Error())
+    logp.Critical("Critical Error: %v", err)
     os.Exit(1)
   }
 
   if err = droppriv.DropPrivileges(config.ConfigSingleton.RunOptions); err != nil {
-    logp.Critical(err.Error())
+    logp.Critical("Critical Error: %v", err)
     os.Exit(1)
   }
 
   logp.Info("Starting input plugins")
-  if err = reader.Reader.Run(publisher.Publisher.Queue); err != nil {
-    logp.Critical(err.Error())
-    os.Exit(1)
-  }
+  go reader.Reader.Run(afterInputsQueue);
+//  if err = reader.Reader.Run(publisher.Publisher.Queue); err != nil {
+//    logp.Critical("Critical Error: %v", err)
+//    os.Exit(1)
+//  }
 
   logp.Info("Turnbeat Started")
-  for {
-    event := <-afterInputsQueue
-    logp.Info("Event: %v", event)
-  }
+  signalChan := make(chan os.Signal, 1)
+  cleanupDone := make(chan bool)
+  signal.Notify(signalChan, os.Interrupt)
+  go func() {
+      for _ = range signalChan {
+        fmt.Println("\nReceived an interrupt, stopping services...\n")
+        //cleanup(services, c)
+        cleanupDone <- true
+      }
+  }()
+  <-cleanupDone
+
+//  for {
+//    event := <-afterInputsQueue
+//    reader.Reader.PrintReaderEvent(event)
+//    logp.Debug("events", "Event: %v", event)
+//  }
 }
+
+

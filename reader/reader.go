@@ -25,7 +25,7 @@ var EnabledInputPlugins map[inputs.InputPlugin]inputs.InputInterface = map[input
   inputs.TcpInput:    new(tcp.TcpInput),
 }
 
-func PrintReaderEvent(event common.MapStr) {
+func (reader *ReaderType) PrintReaderEvent(event common.MapStr) {
   json, err := json.MarshalIndent(event, "", "  ")
   if err != nil {
     logp.Err("json.Marshal: %s", err)
