@@ -34,6 +34,11 @@ output:
 # You can enable one or multiple inputs by setting enabled option to true.
 input:
 
+  syslog:
+    enabled: true
+    port: 514
+    type: "syslog"
+
   tcp:
     enabled: true
     port: 3845

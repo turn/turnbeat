@@ -31,6 +31,7 @@ const (
   FileInput
   StdInput
   TcpInput
+  SyslogInput
 )
 
 // Input names
@@ -39,6 +40,7 @@ var InputNames = []string{
   "file",
   "stdin",
   "tcp",
+  "syslog",
 }
 
 func (i InputPlugin) String() string {
