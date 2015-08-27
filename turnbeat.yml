@@ -39,7 +39,7 @@ input:
 
   syslog:
     enabled: true
-    port: 514
+    port: 1514
     type: "syslog"
 
   tcp:

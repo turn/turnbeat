@@ -8,6 +8,7 @@ import (
   "github.com/johann8384/libbeat/logp"
   "github.com/turn/turnbeat/inputs"
   "github.com/turn/turnbeat/inputs/tcp"
+  "github.com/turn/turnbeat/inputs/syslog"
 )
 
 type ReaderType struct {
@@ -23,6 +24,7 @@ var Reader ReaderType
 
 var EnabledInputPlugins map[inputs.InputPlugin]inputs.InputInterface = map[inputs.InputPlugin]inputs.InputInterface{
   inputs.TcpInput:    new(tcp.TcpInput),
+  inputs.SyslogInput:    new(syslog.SyslogInput),
 }
 
 func (reader *ReaderType) PrintReaderEvent(event common.MapStr) {

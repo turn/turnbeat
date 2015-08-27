@@ -31,7 +31,6 @@ func main() {
   // Use our own FlagSet, because some libraries pollute the global one
   var cmdLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
   configfile := cmdLine.String("c", "./" + Name + ".yml", "Configuration file")
-//  publishDisabled := cmdLine.Bool("N", false, "Disable actual publishing for testing")
   printVersion := cmdLine.Bool("version", false, "Print version and exit")
 
   // Adds logging specific flags
@@ -67,18 +66,6 @@ func main() {
   }
 
   logp.Info("Initializing filter plugins")
-//  for filter, plugin := range EnabledFilterPlugins {
-//    logp.Debug("main", "Registering Plugin: %s", filter)
-//    filters.Filters.Register(filter, plugin)
-//  }
-//  logp.Debug("main", "Filter Config: %s", config.ConfigSingleton.Filter)
-//  filters_plugins, err :=
-//    LoadConfiguredFilters(config.ConfigSingleton.Filter)
-//  if err != nil {
-//    logp.Critical("Error loading filter plugins: %v", err)
-//    os.Exit(1)
-//  }
-//  logp.Debug("main", "Filter plugins order: %v", filters_plugins)
   afterInputsQueue, err := filters.FiltersRun(
     config.ConfigSingleton.Filter,
     EnabledFilterPlugins,
@@ -88,21 +75,6 @@ func main() {
     logp.Critical("%v", err)
     os.Exit(1)
   }
-
-//  var afterInputsQueue chan common.MapStr
-//  if len(filters_plugins) > 0 {
-//    runner := NewFilterRunner(publisher.Publisher.Queue, filters_plugins)
-//    go func() {
-//      err := runner.Run()
-//      if err != nil {
-//        logp.Critical("Filters runner failed: %v", err)
-//      }
-//    }()
-//    afterInputsQueue = runner.FiltersQueue
-//  } else {
-//    // short-circuit the runner
-//    afterInputsQueue = publisher.Publisher.Queue
-//  }
 
   logp.Info("Initializing input plugins")
   if err = reader.Reader.Init(config.ConfigSingleton.Input); err != nil {
@@ -117,10 +89,6 @@ func main() {
 
   logp.Info("Starting input plugins")
   go reader.Reader.Run(afterInputsQueue);
-//  if err = reader.Reader.Run(publisher.Publisher.Queue); err != nil {
-//    logp.Critical("Critical Error: %v", err)
-//    os.Exit(1)
-//  }
 
   logp.Info("Turnbeat Started")
   signalChan := make(chan os.Signal, 1)

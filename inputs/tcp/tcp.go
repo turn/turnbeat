@@ -51,9 +51,10 @@ func (l *TcpInput) Run(output chan common.MapStr) error {
       panic("couldn't start listening: " + err.Error())
   }
   conns := clientConns(server)
-  for {
+  go func(conns chan net.Conn, output chan common.MapStr) {
     go l.handleConn(<-conns, output)
-  }
+  }(conns, output)
+  return nil
 }
 
 func clientConns(listener net.Listener) chan net.Conn {
@@ -100,15 +101,6 @@ func (l *TcpInput) handleConn(client net.Conn, output chan common.MapStr) {
 
         logp.Debug("tcpinputlines", "New Line: %s", &text)
 
-//        metric_data := metricExp.FindStringSubmatchMap(*text)
-//        parsed_tags := strings.Fields(metric_data["metric_tags"])
-//        tags := make(map[string]string)
-
-//        for  _,v := range parsed_tags {
-//          tag := strings.Split(v, "=")
-//          tags[tag[0]] = tag[1]
-//        }
-
         line++
 
         event := common.MapStr{}
@@ -117,11 +109,6 @@ func (l *TcpInput) handleConn(client net.Conn, output chan common.MapStr) {
         event["line"] = line
         event["message"] = text
         event["type"] = l.Type
-//        event["metric_name"] = metric_data["metric_name"]
-//        event["metric_value"] = metric_data["metric_value"]
-//        event["metric_timestamp"] = metric_data["metric_timestamp"]
-//        event["metric_tags"] = metric_data["metric_tags"]
-//        event["metric_tags_map"] = tags
 
         event.EnsureTimestampField(now)
         event.EnsureCountField()
