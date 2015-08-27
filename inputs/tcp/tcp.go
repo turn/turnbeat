@@ -6,38 +6,12 @@ import (
   "bytes"
   "strconv"
   "io"
-  "regexp"
   "time"
-  "strings"
   "errors"
   "github.com/johann8384/libbeat/common"
   "github.com/johann8384/libbeat/logp"
   "github.com/turn/turnbeat/inputs"
 )
-
-//type TSDBMetricExp struct {
-//  *regexp.Regexp
-//}
-
-//var metricExp = TSDBMetricExp{regexp.MustCompile(`^put (?P<metric_name>[\w.]+)[\s]+(?P<metric_timestamp>[0-9]+)[\s]+(?P<metric_value>[0-9.]+)[\s]+(?P<metric_tags>.*$)`)}
-
-//func (r *TSDBMetricExp) FindStringSubmatchMap(s string) map[string]string {
-//  captures := make(map[string]string)
-//
-//  match := r.FindStringSubmatch(s)
-//  if match == nil {
-//    return captures
-//  }
-//
-//  for i, name := range r.SubexpNames() {
-//    if i == 0 {
-//      continue
-//    }
-//    captures[name] = match[i]
-//
-//  }
-//  return captures
-//}
 
 type TcpInput struct {
   Port       int /* the port to listen on */
