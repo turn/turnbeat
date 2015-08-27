@@ -8,7 +8,6 @@ import (
   "runtime"
   "os/signal"
   "gopkg.in/yaml.v2"
-  "github.com/johann8384/libbeat/common"
   "github.com/johann8384/libbeat/common/droppriv"
   "github.com/johann8384/libbeat/publisher"
   "github.com/johann8384/libbeat/logp"
@@ -64,33 +63,46 @@ func main() {
     os.Exit(1)
   }
 
-  logp.Info("Initializing filter plugins")
-  for filter, plugin := range EnabledFilterPlugins {
-    logp.Debug("main", "Registering Plugin: %s", filter)
-    filters.Filters.Register(filter, plugin)
+  stopCb := func() {
   }
-  logp.Debug("main", "Filter Config: %s", config.ConfigSingleton.Filter)
-  filters_plugins, err :=
-    LoadConfiguredFilters(config.ConfigSingleton.Filter)
+
+  logp.Info("Initializing filter plugins")
+//  for filter, plugin := range EnabledFilterPlugins {
+//    logp.Debug("main", "Registering Plugin: %s", filter)
+//    filters.Filters.Register(filter, plugin)
+//  }
+//  logp.Debug("main", "Filter Config: %s", config.ConfigSingleton.Filter)
+//  filters_plugins, err :=
+//    LoadConfiguredFilters(config.ConfigSingleton.Filter)
+//  if err != nil {
+//    logp.Critical("Error loading filter plugins: %v", err)
+//    os.Exit(1)
+//  }
+//  logp.Debug("main", "Filter plugins order: %v", filters_plugins)
+  afterInputsQueue, err := filters.FiltersRun(
+    config.ConfigSingleton.Filter,
+    EnabledFilterPlugins,
+    publisher.Publisher.Queue,
+    stopCb)
   if err != nil {
-    logp.Critical("Error loading filter plugins: %v", err)
+    logp.Critical("%v", err)
     os.Exit(1)
   }
-  logp.Debug("main", "Filter plugins order: %v", filters_plugins)
-  var afterInputsQueue chan common.MapStr
-  if len(filters_plugins) > 0 {
-    runner := NewFilterRunner(publisher.Publisher.Queue, filters_plugins)
-    go func() {
-      err := runner.Run()
-      if err != nil {
-        logp.Critical("Filters runner failed: %v", err)
-      }
-    }()
-    afterInputsQueue = runner.FiltersQueue
-  } else {
-    // short-circuit the runner
-    afterInputsQueue = publisher.Publisher.Queue
-  }
+
+//  var afterInputsQueue chan common.MapStr
+//  if len(filters_plugins) > 0 {
+//    runner := NewFilterRunner(publisher.Publisher.Queue, filters_plugins)
+//    go func() {
+//      err := runner.Run()
+//      if err != nil {
+//        logp.Critical("Filters runner failed: %v", err)
+//      }
+//    }()
+//    afterInputsQueue = runner.FiltersQueue
+//  } else {
+//    // short-circuit the runner
+//    afterInputsQueue = publisher.Publisher.Queue
+//  }
 
   logp.Info("Initializing input plugins")
   if err = reader.Reader.Init(config.ConfigSingleton.Input); err != nil {
