@@ -28,6 +28,9 @@ output:
     host: "localhost:9092"
     topic: "pipeline-input"
 
+
+filter:
+  filters: ["nop", "opentsdb"]
 ############################# Input #############################################
 
 # Configure what inputs to use when collecting data with turnbeat.

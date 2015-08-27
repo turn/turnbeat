@@ -32,14 +32,14 @@ func main() {
   // Use our own FlagSet, because some libraries pollute the global one
   var cmdLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
   configfile := cmdLine.String("c", "./" + Name + ".yml", "Configuration file")
-  publishDisabled := cmdLine.Bool("N", false, "Disable actual publishing for testing")
+//  publishDisabled := cmdLine.Bool("N", false, "Disable actual publishing for testing")
   printVersion := cmdLine.Bool("version", false, "Print version and exit")
 
   // Adds logging specific flags
   logp.CmdLineFlags(cmdLine)
+  publisher.CmdLineFlags(cmdLine)
 
   cmdLine.Parse(os.Args[1:])
-
   if *printVersion {
     fmt.Printf("Turnbeat version %s (%s)\n", Version, runtime.GOARCH)
     return
@@ -59,9 +59,7 @@ func main() {
   logp.Init(Name, &config.ConfigSingleton.Logging)
 
   logp.Info("Initializing output plugins")
-  if err = publisher.Publisher.Init(*publishDisabled, config.ConfigSingleton.Output,
-    config.ConfigSingleton.Shipper); err != nil {
-
+  if err = publisher.Publisher.Init(config.ConfigSingleton.Output, config.ConfigSingleton.Shipper); err != nil {
     logp.Critical(err.Error())
     os.Exit(1)
   }
