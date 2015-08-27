@@ -30,7 +30,7 @@ output:
 
 
 filter:
-  filters: ["nop"]
+  filters: ["nop", "opentsdb"]
 ############################# Input #############################################
 
 # Configure what inputs to use when collecting data with turnbeat.
