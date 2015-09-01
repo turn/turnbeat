@@ -24,13 +24,20 @@ agent:
 output:
 
   kafka:
-    enabled: true
+    enabled: false
     host: "localhost:9092"
     topic: "pipeline-input"
 
+  file:
+    enabled: true
+    path: "/tmp"
+    filename: turnbeat
+    rotate_every_kb: 1000
+    number_of_files: 2
+
 
 filter:
-  filters: ["nop", "opentsdb"]
+  filters: ["nop"]
 ############################# Input #############################################
 
 # Configure what inputs to use when collecting data with turnbeat.
@@ -46,3 +53,6 @@ input:
     enabled: true
     port: 3845
     type: "tcollector"
+
+  procfs:
+    enabled: true
