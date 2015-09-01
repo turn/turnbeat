@@ -33,7 +33,6 @@ const (
   TcpInput
   SyslogInput
   ProcfsInput
-  NullInput
 )
 
 // Input names
@@ -44,7 +43,6 @@ var InputNames = []string{
   "tcp",
   "syslog",
   "procfs",
-  "null",
 }
 
 func (i InputPlugin) String() string {
