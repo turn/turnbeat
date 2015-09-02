@@ -29,15 +29,18 @@ output:
     topic: "pipeline-input"
 
   file:
-    enabled: true
+    enabled: false
     path: "/tmp"
     filename: turnbeat
     rotate_every_kb: 1000
     number_of_files: 2
 
+  stdout:
+    enabled: true
 
 filter:
-  filters: ["nop", "opentsdb"]
+#  filters: ["nop", "opentsdb"]
+  filters: []
 ############################# Input #############################################
 
 # Configure what inputs to use when collecting data with turnbeat.
