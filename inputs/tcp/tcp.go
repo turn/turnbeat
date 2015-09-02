@@ -38,41 +38,30 @@ func (l *TcpInput) Init(config inputs.MothershipConfig) error {
   }
   l.Type = config.Type
 
-  logp.Info("[TcpInput] Using Port %d", l.Port)
-  logp.Info("[TcpInput] Adding Event Type %s", l.Type)
+  logp.Debug("tcpinput", "Using Port %d", l.Port)
+  logp.Debug("tcpinput", "Adding Event Type %s", l.Type)
 
   return nil
 }
 
 func (l *TcpInput) Run(output chan common.MapStr) error {
-  logp.Debug("tcpinput", "Running TCP Input")
+  logp.Info("[TcpInput] Running TCP Input")
   server, err := net.Listen("tcp", ":" + strconv.Itoa(l.Port))
   if server == nil {
       panic("couldn't start listening: " + err.Error())
   }
-  conns := clientConns(server)
-  go func(conns chan net.Conn, output chan common.MapStr) {
-    go l.handleConn(<-conns, output)
-  }(conns, output)
-  return nil
-}
+  logp.Info("[TcpInput] Listening on port %d", l.Port)
 
-func clientConns(listener net.Listener) chan net.Conn {
-    ch := make(chan net.Conn)
-    i := 0
-    go func() {
-        for {
-            client, err := listener.Accept()
-            if client == nil {
-                logp.Info("couldn't accept: " + err.Error())
-                continue
-            }
-            i++
-            logp.Debug("tcpinput", "%d: %v <-> %v\n", i, client.LocalAddr(), client.RemoteAddr())
-            ch <- client
-        }
-    }()
-    return ch
+  for {
+    // Listen for an incoming connection.
+    conn, err := server.Accept()
+    if err != nil {
+      logp.Err("Error accepting: ", err.Error())
+    } else {
+      go l.handleConn(conn, output)
+    }
+  }
+  return nil
 }
 
 func (l *TcpInput) handleConn(client net.Conn, output chan common.MapStr) {
