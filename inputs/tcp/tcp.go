@@ -38,8 +38,8 @@ func (l *TcpInput) Init(config inputs.MothershipConfig) error {
   }
   l.Type = config.Type
 
-  logp.Info("[TcpInput] Using Port %d", l.Port)
-  logp.Info("[TcpInput] Adding Event Type %s", l.Type)
+  logp.Debug("tcpinput", "Using Port %d", l.Port)
+  logp.Debug("tcpinput", "Adding Event Type %s", l.Type)
 
   return nil
 }
