@@ -52,6 +52,11 @@ input:
     port: 1514
     type: "syslog"
 
+  syslog_2:
+    enabled: true
+    port: 1515
+    type: "syslog-net"
+
   tcp:
     enabled: true
     port: 3845
@@ -59,3 +64,9 @@ input:
 
   procfs:
     enabled: true
+
+  tcp_2:
+    enabled: true
+    port: 3846
+    type: "other"
+
