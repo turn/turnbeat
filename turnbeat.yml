@@ -63,7 +63,11 @@ input:
     type: "tcollector"
 
   procfs:
-    enabled: true
+    enabled: false
+
+# null input, sample code  
+  null_0:
+    enabled: false
 
   tcp_2:
     enabled: true

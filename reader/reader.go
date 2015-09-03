@@ -11,6 +11,7 @@ import (
   "github.com/turn/turnbeat/inputs/tcp"
   "github.com/turn/turnbeat/inputs/syslog"
   "github.com/turn/turnbeat/inputs/procfs"
+  "github.com/turn/turnbeat/inputs/null"
 )
 
 type ReaderType struct {
@@ -36,6 +37,8 @@ func newInputInstance(name string) inputs.InputInterface {
     return new(syslog.SyslogInput)
   case "procfs":
     return new(procfs.ProcfsInput)
+  case "null":
+    return new(null.NullInput)
   }
   return nil
 }
