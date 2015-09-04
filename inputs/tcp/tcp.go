@@ -47,10 +47,9 @@ func (l *TcpInput) Init(config inputs.MothershipConfig) error {
 func (l *TcpInput) Run(output chan common.MapStr) error {
   logp.Info("[TcpInput] Running TCP Input")
   server, err := net.Listen("tcp", ":" + strconv.Itoa(l.Port))
-  if server == nil {
-      // question - should we really quit completely if we can't bind to a single socket?
-      // or just log an error and keep going
-      panic ("couldn't start listening: " + err.Error())
+  if err != nil {
+      logp.Err("couldn't start listening: " + err.Error())
+      return nil
   }
   logp.Info("[TcpInput] Listening on port %d", l.Port)
 
