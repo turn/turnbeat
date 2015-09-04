@@ -79,12 +79,21 @@ func (l *SyslogInput) Run(output chan common.MapStr) error {
       }
 
       event["source"] = event["client"].(string)
+
       if event["message"] != nil {
-        message := event["message"].(string)        
+        message := event["message"].(string)
         event["message"] = &message
       } else if event["content"] != nil {
         message := event["content"].(string)
         event["message"] = &message
+      }
+
+      // This syslog parser uses the standard name "tag"
+      // which is usually the program that wrote it.
+      // The logstash syslog_pri puts "program" for this field.
+      if event["tag"] != nil {
+        program := event["tag"].(string)
+        event["program"] = &program
       }
 
       event.EnsureTimestampField(now)
