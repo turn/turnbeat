@@ -21,35 +21,3 @@ type InputInterface interface {
   // Run
   Run(chan common.MapStr) error
 }
-
-// Input identifier
-type InputPlugin uint16
-
-// Input constants
-const (
-  Unknowninput InputPlugin = iota
-  FileInput
-  StdInput
-  TcpInput
-  SyslogInput
-  ProcfsInput
-  NullInput
-)
-
-// Input names
-var InputNames = []string{
-  "unknown",
-  "file",
-  "stdin",
-  "tcp",
-  "syslog",
-  "procfs",
-  "null",
-}
-
-func (i InputPlugin) String() string {
-  if int(i) >= len(InputNames) {
-    return "impossible"
-  }
-  return InputNames[i]
-}
