@@ -63,7 +63,8 @@ input:
     type: "tcollector"
 
   procfs:
-    enabled: false
+    enabled: true
+    sleep_interval: 60
 
 # null input, sample code  
   null_0:

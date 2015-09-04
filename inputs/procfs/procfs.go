@@ -1,6 +1,7 @@
 package procfs
 
 import (
+  "strconv"
   "os"
   "io/ioutil"
   "path"
@@ -26,34 +27,15 @@ func (l *ProcfsInput) InputVersion() string {
 
 func (l *ProcfsInput) Init(config inputs.MothershipConfig) error {
 
-  l.Sleep = 10 /* hard code for now */
-
-  logp.Info("[ProcfsInput] Initialized, using sleep interval %s", l.Sleep)
-
-  return nil
-}
-
-func scanProc(PID string) (common.MapStr) {
-  now := func() time.Time {
-    t := time.Now()
-    return t
+  if config.Sleep_interval == 0 {
+    l.Sleep = 15 /* default to 15s */
+  } else {
+    l.Sleep = config.Sleep_interval
   }
 
-  pdir := path.Join(procfsdir, PID)
+  logp.Info("[ProcfsInput] Initialized, using sleep interval " + strconv.Itoa(l.Sleep))
 
-  cl, _ := ioutil.ReadFile(path.Join(pdir, "cmdline"))
-  cmdline := string(cl[:])
-
-  cwd, _ := os.Readlink(path.Join(pdir, "cwd"))
-
-  event := common.MapStr{}
-  event["message"] = cmdline
-  event["cwd"] = cwd
-  event["type"] = "process"
-
-  event.EnsureTimestampField(now)
-  event.EnsureCountField()
-  return event
+  return nil
 }
 
 func getProcInfo(PID string) (common.MapStr) {
@@ -72,8 +54,6 @@ func getProcInfo(PID string) (common.MapStr) {
 }
 
 func scanProcs(output chan common.MapStr) {
-//  event := scanProc("self")
-//  output <- event
   now := func() time.Time {
     t := time.Now()
     return t
