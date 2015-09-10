@@ -10,6 +10,7 @@ type MothershipConfig struct {
   Flush_interval     *int
   Max_retries        *int
   Type               string
+  Sleep_interval     int
 }
 
 // Functions to be exported by an input plugin

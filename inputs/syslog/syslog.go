@@ -53,10 +53,19 @@ func (l *SyslogInput) Run(output chan common.MapStr) error {
   server := syslog.NewServer()
   server.SetFormat(syslog.Automatic)
   server.SetHandler(handler)
-  server.ListenUDP(listen)
-  server.ListenTCP(listen)
+  err := server.ListenUDP(listen)
+  if err != nil {
+      logp.Err("couldn't start ListenUDP: " + err.Error())
+  }
+  err = server.ListenTCP(listen)
+  if err != nil {
+      logp.Err("couldn't start ListenTCP: " + err.Error())
+  }
+  err = server.Boot()
+  if err != nil {
+      logp.Err("couldn't start server.Boot(): " + err.Error())
+  }
 
-  server.Boot()
 
   go func(channel syslog.LogPartsChannel, output chan common.MapStr) {
     var line uint64 = 0

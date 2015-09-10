@@ -1,6 +1,8 @@
 package procfs
 
 import (
+	"strings"
+	"bytes"
         "os"
         "regexp"
         "syscall"
@@ -16,3 +18,11 @@ func isNumeric(s string) bool {
         return a
 }
 
+func byteTransform(buff []byte) string {
+  // replace null bytes with spaces
+  b := bytes.Replace(buff[:], []byte{0}, []byte(" "), -1)
+  str := string(b[:])
+  // trim trailing spaces
+  str = strings.Trim(str, " ")
+  return str
+}

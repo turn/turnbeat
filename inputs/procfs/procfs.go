@@ -1,6 +1,7 @@
 package procfs
 
 import (
+  "strconv"
   "os"
   "io/ioutil"
   "path"
@@ -26,54 +27,53 @@ func (l *ProcfsInput) InputVersion() string {
 
 func (l *ProcfsInput) Init(config inputs.MothershipConfig) error {
 
-  l.Sleep = 10 /* hard code for now */
+  if config.Sleep_interval == 0 || config.Sleep_interval < 15 {
+    l.Sleep = 15 /* default to 15s */
+  } else {
+    l.Sleep = config.Sleep_interval
+  }
 
-  logp.Info("[ProcfsInput] Initialized, using sleep interval %s", l.Sleep)
+  logp.Info("[ProcfsInput] Initialized, using sleep interval " + strconv.Itoa(l.Sleep))
 
   return nil
 }
 
-func scanProc(PID string) (common.MapStr) {
-  now := func() time.Time {
-    t := time.Now()
-    return t
-  }
+type Process struct {
+	PID	int
+        Cmdline string
+        Cwd     string
+	Root	string
+        Status  string
+	// Fds
+	// Threads
+}
 
+func getProcDetail(PID string) (*Process) {
+  pdir := path.Join(procfsdir, PID)
+
+  p := new(Process)
+  p.PID, _ = strconv.Atoi(PID)
+
+  cl, _ := ioutil.ReadFile(path.Join(pdir, "cmdline"))
+  p.Cwd, _ = os.Readlink(path.Join(pdir, "cwd"))
+  p.Root, _ = os.Readlink(path.Join(pdir, "root"))
+  status, _ := ioutil.ReadFile(path.Join(pdir, "status"))
+
+  p.Cmdline = byteTransform(cl)
+  p.Status = byteTransform(status)
+
+  return p
+}
+
+func getCmdline(PID string) string {
   pdir := path.Join(procfsdir, PID)
 
   cl, _ := ioutil.ReadFile(path.Join(pdir, "cmdline"))
-  cmdline := string(cl[:])
-
-  cwd, _ := os.Readlink(path.Join(pdir, "cwd"))
-
-  event := common.MapStr{}
-  event["message"] = cmdline
-  event["cwd"] = cwd
-  event["type"] = "process"
-
-  event.EnsureTimestampField(now)
-  event.EnsureCountField()
-  return event
-}
-
-func getProcInfo(PID string) (common.MapStr) {
-   pdir := path.Join(procfsdir, PID)
-
-  cl, _ := ioutil.ReadFile(path.Join(pdir, "cmdline"))
-  cmdline := string(cl[:])
-
-  cwd, _ := os.Readlink(path.Join(pdir, "cwd"))
-
-  retval := common.MapStr{}
-  retval["cmdline"] = cmdline
-  retval["cwd"] = cwd
-
-  return retval
+  cmdline := byteTransform(cl)
+  return cmdline
 }
 
 func scanProcs(output chan common.MapStr) {
-//  event := scanProc("self")
-//  output <- event
   now := func() time.Time {
     t := time.Now()
     return t
@@ -89,18 +89,21 @@ func scanProcs(output chan common.MapStr) {
 
   event := common.MapStr{}
   processes := common.MapStr{}
+  proc_detail := common.MapStr{}
 
   // get all numeric entries
   for _, d := range ds {
     n := d.Name()
     if isNumeric(n) {
-      processes[n] = getProcInfo(n)
+      processes[n] = getCmdline(n)
+      proc_detail[n] = getProcDetail(n)
     }
   }
 
   text := "process report"
   event["message"] = &text
   event["data"] = processes
+  event["data_detail"] = proc_detail
   event["type"] = "report"
 
   event.EnsureTimestampField(now)
