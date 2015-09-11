@@ -66,6 +66,10 @@ input:
     enabled: true
     sleep_interval: 60
 
+  packages:
+    enabled: true
+    sleep_interval: 30
+
 # null input, sample code  
   null_0:
     enabled: false
