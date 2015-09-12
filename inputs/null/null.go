@@ -67,17 +67,12 @@ func (l *NullInput) doStuff(output chan common.MapStr) {
 
 }
 
-func (l *NullInput) runTick(output chan common.MapStr) {
-  // run the doStuff method
-  l.doStuff(output)
-}
-
 // If you had a periodic type input, use the below as the "Run" method instead of the above "Run"
 func (l *NullInput) RunPeriodic (output chan common.MapStr) error {
   logp.Debug("[nullinput]", "Starting up Null Input")
 
   // use the runTick for tick interval, empty functions for minor and major
-  go inputs.PeriodicTaskRunner (l, output, l.runTick, inputs.EmptyFunc, inputs.EmptyFunc)
+  go inputs.PeriodicTaskRunner (l, output, l.doStuff, inputs.EmptyFunc, inputs.EmptyFunc)
 
   return nil
 }
