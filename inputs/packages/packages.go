@@ -13,6 +13,7 @@ import (
 )
 
 type PackagesInput struct {
+  Config    inputs.MothershipConfig
   Type      string
 }
 
@@ -31,19 +32,21 @@ func (l *PackagesInput) InputVersion() string {
 }
 
 func (l *PackagesInput) Init(config inputs.MothershipConfig) error {
+  l.Config = config
   l.Type = "Packages"
   logp.Info("[PackagesInput] Initialized")
   return nil
 }
 
-func (l *PackagesInput) Run(output chan common.MapStr) error {
+func (l *PackagesInput) GetConfig() inputs.MothershipConfig {
+  return l.Config
+}
 
+func (l *PackagesInput) Run(output chan common.MapStr) error {
   logp.Debug("[PackagesInput]", "Running Packages Input")
 
   // dispatch thread here
-  go func(output chan common.MapStr) {
-    l.doStuff(output)
-  }(output)
+  go inputs.PeriodicTaskRunner (l, output, l.doStuff, inputs.EmptyFunc, inputs.EmptyFunc)
 
   return nil
 }

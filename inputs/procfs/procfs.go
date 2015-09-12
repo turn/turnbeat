@@ -39,6 +39,10 @@ func (l *ProcfsInput) Init(config inputs.MothershipConfig) error {
   return nil
 }
 
+func (l *ProcfsInput) GetConfig() inputs.MothershipConfig {
+  return l.Config
+}
+
 type Process struct {
 	PID	int
         Cmdline string
@@ -134,43 +138,10 @@ func runMajor(output chan common.MapStr) {
   // nothing for now
 }
 
-func (l *ProcfsInput) GetConfig() inputs.MothershipConfig {
-  return l.Config
-}
-
-type taskRunner func(chan common.MapStr) 
-
-func (l *ProcfsInput) PeriodicTaskRunner (output chan common.MapStr, ti taskRunner, mi taskRunner, ma taskRunner) {
-  mi_last := time.Now()
-  ma_last := time.Now()
-  config := l.GetConfig()
-
-  for {
-    ti(output)
-    time.Sleep(time.Duration(config.Tick_interval) * time.Second)
-    if (time.Since(mi_last) > time.Duration(config.Minor_interval) * time.Second) {
-      mi(output)
-      mi_last = time.Now()
-    }
-    if (time.Since(ma_last) > time.Duration(config.Major_interval) * time.Second) {
-      ma(output)
-      ma_last = time.Now()
-    }
-  }
-
-}
-
 func (l *ProcfsInput) Run(output chan common.MapStr) error {
   logp.Debug("[procfsinput]", "Starting up Procfs Input")
 
-  go l.PeriodicTaskRunner (output, runTick, runMinor, runMajor)
-/*
-  go func(output chan common.MapStr) {
-    for {
-      l.periodic(output)
-      time.Sleep(time.Duration(l.Tick_interval) * time.Second)
-    }
-  }(output)
-*/
+  go inputs.PeriodicTaskRunner (l, output, runTick, runMinor, runMajor)
+
   return nil
 }

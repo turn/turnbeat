@@ -11,6 +11,7 @@ import (
 )
 
 type SyslogInput struct {
+  Config     inputs.MothershipConfig
   Port       int /* the port to listen on */
   Type       string /* the type to add to events */
 }
@@ -25,6 +26,7 @@ func (l *SyslogInput) InputVersion() string {
 
 func (l *SyslogInput) Init(config inputs.MothershipConfig) error {
 
+  l.Config = config
   if config.Port == 0 {
     return errors.New("No Input Port specified")
   }
@@ -39,6 +41,10 @@ func (l *SyslogInput) Init(config inputs.MothershipConfig) error {
   logp.Info("[SyslogInput] Adding Event Type %s", l.Type)
 
   return nil
+}
+
+func (l *SyslogInput) GetConfig() inputs.MothershipConfig {
+  return l.Config
 }
 
 func (l *SyslogInput) Run(output chan common.MapStr) error {

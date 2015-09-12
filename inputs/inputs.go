@@ -1,6 +1,7 @@
 package inputs
 
 import (
+  "time"
   "github.com/johann8384/libbeat/common"
 )
 
@@ -21,7 +22,7 @@ type InputInterface interface {
   // Initialize the input plugin
   Init(config MothershipConfig) error
   // Be able to retrieve the config
-//  GetConfig() MothershipConfig
+  GetConfig() MothershipConfig
   InputType() string
   InputVersion() string
   // Run
@@ -51,3 +52,27 @@ func (l *MothershipConfig) Normalize (global MothershipConfig)  {
     l.Major_interval = 900
   }
 }
+
+// PeriodTaskRunner
+type taskRunner func(chan common.MapStr)
+
+func PeriodicTaskRunner (l InputInterface, output chan common.MapStr, ti taskRunner, mi taskRunner, ma taskRunner) {
+  mi_last := time.Now()
+  ma_last := time.Now()
+  config := l.GetConfig()
+
+  for {
+    ti(output)
+    time.Sleep(time.Duration(config.Tick_interval) * time.Second)
+    if (time.Since(mi_last) > time.Duration(config.Minor_interval) * time.Second) {
+      mi(output)
+      mi_last = time.Now()
+    }
+    if (time.Since(ma_last) > time.Duration(config.Major_interval) * time.Second) {
+      ma(output)
+      ma_last = time.Now()
+    }
+  }
+}
+
+func EmptyFunc (chan common.MapStr) {}

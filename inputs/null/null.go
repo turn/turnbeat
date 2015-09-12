@@ -10,7 +10,8 @@ import (
 )
 
 type NullInput struct {
-  Type	string
+  Config  inputs.MothershipConfig
+  Type	  string
 }
 
 func (l *NullInput) InputType() string {
@@ -23,10 +24,17 @@ func (l *NullInput) InputVersion() string {
 
 func (l *NullInput) Init(config inputs.MothershipConfig) error {
   l.Type = "null"
+  l.Config = config
   logp.Info("[NullInput] Initialized")
   return nil
 }
 
+func (l *NullInput) GetConfig() inputs.MothershipConfig {
+  return l.Config
+}
+
+// below is an example of a run for an "interrupt" style input
+// see bottom for a "periodic" style input
 func (l *NullInput) Run(output chan common.MapStr) error {
   logp.Debug("[NullInput]", "Running Null Input")
 
@@ -58,3 +66,19 @@ func (l *NullInput) doStuff(output chan common.MapStr) {
 
 
 }
+
+func (l *NullInput) runTick(output chan common.MapStr) {
+  // run the doStuff method
+  l.doStuff(output)
+}
+
+// If you had a periodic type input, use the below as the "Run" method instead of the above "Run"
+func (l *NullInput) RunPeriodic (output chan common.MapStr) error {
+  logp.Debug("[nullinput]", "Starting up Null Input")
+
+  // use the runTick for tick interval, empty functions for minor and major
+  go inputs.PeriodicTaskRunner (l, output, l.runTick, inputs.EmptyFunc, inputs.EmptyFunc)
+
+  return nil
+}
+
