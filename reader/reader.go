@@ -55,10 +55,12 @@ func (reader *ReaderType) PrintReaderEvent(event common.MapStr) {
   }
 }
 
-func (reader *ReaderType) Init(inputs map[string]inputs.MothershipConfig) error {
-  logp.Info("reader input config", inputs)
+func (reader *ReaderType) Init(inputMap map[string]inputs.MothershipConfig) error {
+  logp.Info("reader input config", inputMap)
 
-  for inputId, config := range inputs {
+  var globalConf inputs.MothershipConfig
+
+  for inputId, config := range inputMap {
     // default instance 0
     inputName, instance := inputId, "0"
     if (strings.Contains(inputId, "_")) {
@@ -69,8 +71,15 @@ func (reader *ReaderType) Init(inputs map[string]inputs.MothershipConfig) error 
     logp.Info(fmt.Sprintf("input type: %s instance: %s\n", inputName, instance))
     logp.Debug("reader", "instance config: %s", config)
 
+    // handling for "global" config section
+    if (inputName == "global") {
+      logp.Info("global input configuration read")
+      globalConf = config
+    }
+    
     plugin := newInputInstance(inputName)
     if plugin != nil && config.Enabled {
+      config.Normalize(globalConf)
       err := plugin.Init(config)
       if err != nil {
         logp.Err("Fail to initialize %s plugin as input: %s", inputName, err)
