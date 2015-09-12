@@ -29,6 +29,7 @@ type InputInterface interface {
   Run(chan common.MapStr) error
 }
 
+// Normalize a config by pulling in global settings if appropriate, and enforcing absolute minimums
 func (l *MothershipConfig) Normalize (global MothershipConfig)  {
   // default to global if none assigned
   if l.Tick_interval == 0 {
@@ -53,8 +54,11 @@ func (l *MothershipConfig) Normalize (global MothershipConfig)  {
   }
 }
 
-// PeriodTaskRunner
+// PeriodicTaskRunner and friends
 type taskRunner func(chan common.MapStr)
+
+// empty function useful for passing into PeriodicTaskRunner sometimes
+func EmptyFunc (chan common.MapStr) {}
 
 func PeriodicTaskRunner (l InputInterface, output chan common.MapStr, ti taskRunner, mi taskRunner, ma taskRunner) {
   mi_last := time.Now()
@@ -75,4 +79,3 @@ func PeriodicTaskRunner (l InputInterface, output chan common.MapStr, ti taskRun
   }
 }
 
-func EmptyFunc (chan common.MapStr) {}
