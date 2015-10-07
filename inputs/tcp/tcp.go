@@ -14,6 +14,7 @@ import (
 )
 
 type TcpInput struct {
+  Config     inputs.MothershipConfig
   Port       int /* the port to listen on */
   Type       string /* the type to add to events */
 }
@@ -28,6 +29,7 @@ func (l *TcpInput) InputVersion() string {
 
 func (l *TcpInput) Init(config inputs.MothershipConfig) error {
 
+  l.Config = config
   if config.Port == 0 {
     return errors.New("No Input Port specified")
   }
@@ -42,6 +44,10 @@ func (l *TcpInput) Init(config inputs.MothershipConfig) error {
   logp.Debug("tcpinput", "Adding Event Type %s", l.Type)
 
   return nil
+}
+
+func (l *TcpInput) GetConfig() inputs.MothershipConfig {
+  return l.Config
 }
 
 func (l *TcpInput) Run(output chan common.MapStr) error {

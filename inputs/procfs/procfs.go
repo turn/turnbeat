@@ -14,7 +14,10 @@ import (
 const procfsdir = "/proc"
 
 type ProcfsInput struct {
-  Sleep		 int
+  Config             inputs.MothershipConfig
+  Tick_interval      int
+  Minor_interval     int
+  Major_interval     int
 }
 
 func (l *ProcfsInput) InputType() string {
@@ -27,15 +30,17 @@ func (l *ProcfsInput) InputVersion() string {
 
 func (l *ProcfsInput) Init(config inputs.MothershipConfig) error {
 
-  if config.Sleep_interval == 0 || config.Sleep_interval < 15 {
-    l.Sleep = 15 /* default to 15s */
-  } else {
-    l.Sleep = config.Sleep_interval
-  }
+  l.Config = config
 
-  logp.Info("[ProcfsInput] Initialized, using sleep interval " + strconv.Itoa(l.Sleep))
+  l.Tick_interval = config.Tick_interval
+
+  logp.Info("[ProcfsInput] Initialized, using tick interval " + strconv.Itoa(l.Tick_interval))
 
   return nil
+}
+
+func (l *ProcfsInput) GetConfig() inputs.MothershipConfig {
+  return l.Config
 }
 
 type Process struct {
@@ -117,15 +122,26 @@ func (l *ProcfsInput) periodic(output chan common.MapStr) {
   scanProcs(output)
 }
 
+func runTick(output chan common.MapStr) {
+  logp.Debug("[procfsinput]", "Performing Tick tasks..")
+  // nothing for now
+}
+
+func runMinor(output chan common.MapStr) {
+  logp.Debug("[procfsinput]", "Performing Minor tasks..")
+
+  scanProcs(output)
+}
+
+func runMajor(output chan common.MapStr) {
+  logp.Debug("[procfsinput]", "Performing Tick..")
+  // nothing for now
+}
+
 func (l *ProcfsInput) Run(output chan common.MapStr) error {
   logp.Debug("[procfsinput]", "Starting up Procfs Input")
 
-  go func(output chan common.MapStr) {
-    for {
-      l.periodic(output)
-      time.Sleep(time.Duration(l.Sleep) * time.Second)
-    }
-  }(output)
+  go inputs.PeriodicTaskRunner (l, output, runTick, runMinor, runMajor)
 
   return nil
 }
