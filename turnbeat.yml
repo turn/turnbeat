@@ -58,6 +58,10 @@ input:
     port: 1514
     type: "syslog"
 
+  tail_1:
+    enabled: true
+    filename: "/var/log/messages"
+
   syslog_2:
     enabled: true
     port: 1515
