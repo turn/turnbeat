@@ -36,7 +36,7 @@ output:
     number_of_files: 2
 
   stdout:
-    enabled: fales
+    enabled: false
 
 filter:
 #  filters: ["nop", "opentsdb"]
