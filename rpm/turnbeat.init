@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# turnbeat:	basic startup script for turnbeat
+#
+# chkconfig: - 2345 15 85
+# description:  monitoring agent
+# processname:  /usr/local/turnbeat/turnbeat
+# config:       /etc/turnbeat.yml
+
+. /etc/rc.d/init.d/functions
+RETVAL=0
+conf=/etc/turnbeat.yml
+prog=/usr/local/turnbeat/turnbeat
+lockfile=/var/lock/subsys/turnbeat
+
+start() {
+        echo -n $"Starting $prog: "
+        daemon $prog -c $conf &
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch $lockfile
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Stopping $prog: "
+        killproc $prog
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f $lockfile
+        return $RETVAL
+}
+
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    reload)
+        echo "$0: Unimplemented feature."
+        RETVAL=3
+        ;;
+    force-reload)
+        echo "$0: Unimplemented feature."
+        RETVAL=3
+        ;;
+    condrestart)
+        if [ -f $lockfile ]; then
+            restart
+        fi
+        ;;
+    status)
+        status turnbeat
+        RETVAL=$?
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|reload|force-reload}"
+        RETVAL=3
+        ;;
+esac
+
+exit $RETVAL
