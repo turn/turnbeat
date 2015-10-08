@@ -9,6 +9,7 @@ import (
   "github.com/johann8384/libbeat/logp"
   "github.com/turn/turnbeat/inputs"
   "github.com/turn/turnbeat/inputs/tcp"
+  "github.com/turn/turnbeat/inputs/tail"
   "github.com/turn/turnbeat/inputs/syslog"
   "github.com/turn/turnbeat/inputs/procfs"
   "github.com/turn/turnbeat/inputs/packages"
@@ -34,6 +35,8 @@ func newInputInstance(name string) inputs.InputInterface {
   switch name {
   case "tcp":
     return new(tcp.TcpInput)
+  case "tail":
+    return new(tail.TailInput)
   case "syslog":
     return new(syslog.SyslogInput)
   case "procfs":

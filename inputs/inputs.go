@@ -15,6 +15,7 @@ type MothershipConfig struct {
   Tick_interval      int
   Minor_interval     int
   Major_interval     int
+  Filename           string
 }
 
 // Functions to be exported by an input plugin
