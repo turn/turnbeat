@@ -1,7 +1,7 @@
 package inputs
 
 import (
-	"github.com/johann8384/libbeat/common"
+	"github.com/blacklightops/libbeat/common"
 	"time"
 )
 

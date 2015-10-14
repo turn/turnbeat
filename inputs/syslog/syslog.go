@@ -3,9 +3,9 @@ package syslog
 import (
 	"errors"
 	"fmt"
-	"github.com/johann8384/libbeat/common"
-	"github.com/johann8384/libbeat/logp"
-	"github.com/turn/turnbeat/inputs"
+	"github.com/blacklightops/libbeat/common"
+	"github.com/blacklightops/libbeat/logp"
+	"github.com/blacklightops/turnbeat/inputs"
 	"gopkg.in/mcuadros/go-syslog.v2"
 	"time"
 )

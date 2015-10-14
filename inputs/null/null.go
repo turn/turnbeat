@@ -3,9 +3,9 @@ package null
 /* an empty input, useful as a starting point for a new input */
 
 import (
-	"github.com/johann8384/libbeat/common"
-	"github.com/johann8384/libbeat/logp"
-	"github.com/turn/turnbeat/inputs"
+	"github.com/blacklightops/libbeat/common"
+	"github.com/blacklightops/libbeat/logp"
+	"github.com/blacklightops/turnbeat/inputs"
 	"time"
 )
 

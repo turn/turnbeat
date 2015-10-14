@@ -1,11 +1,11 @@
 package config
 
 import (
-	"github.com/johann8384/libbeat/common/droppriv"
-	"github.com/johann8384/libbeat/logp"
-	"github.com/johann8384/libbeat/outputs"
-	"github.com/johann8384/libbeat/publisher"
-	"github.com/turn/turnbeat/inputs"
+	"github.com/blacklightops/libbeat/common/droppriv"
+	"github.com/blacklightops/libbeat/logp"
+	"github.com/blacklightops/libbeat/outputs"
+	"github.com/blacklightops/libbeat/publisher"
+	"github.com/blacklightops/turnbeat/inputs"
 )
 
 type Config struct {
