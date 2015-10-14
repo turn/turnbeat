@@ -6,7 +6,7 @@ License:	Apache
 Group:          System/Monitoring
 # Distribution:   buildhash=@GIT_FULLSHA1@
 Provides:	turnbeat
-Source:		https://github.com/turn/turnbeat
+Source:		https://github.com/blacklightops/turnbeat
 
 # initial super hacky rpm spec file
 # expects to find following files in $RPM_SOURCE_DIR
