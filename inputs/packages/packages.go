@@ -3,103 +3,102 @@ package packages
 /* an empty input, useful as a starting point for a new input */
 
 import (
-  "bytes"
-  "os/exec"
-  "time"
-  "strings"
-  "github.com/johann8384/libbeat/common"
-  "github.com/johann8384/libbeat/logp"
-  "github.com/turn/turnbeat/inputs"
+	"bytes"
+	"github.com/johann8384/libbeat/common"
+	"github.com/johann8384/libbeat/logp"
+	"github.com/turn/turnbeat/inputs"
+	"os/exec"
+	"strings"
+	"time"
 )
 
 type PackagesInput struct {
-  Config    inputs.MothershipConfig
-  Type      string
+	Config inputs.MothershipConfig
+	Type   string
 }
 
 type RPMPackage struct {
-    Name string
-    Version string
-    Arch  string
+	Name    string
+	Version string
+	Arch    string
 }
 
 func (l *PackagesInput) InputType() string {
-  return "PackagesInput"
+	return "PackagesInput"
 }
 
 func (l *PackagesInput) InputVersion() string {
-  return "0.0.1"
+	return "0.0.1"
 }
 
 func (l *PackagesInput) Init(config inputs.MothershipConfig) error {
-  l.Config = config
-  l.Type = "Packages"
-  logp.Info("[PackagesInput] Initialized")
-  return nil
+	l.Config = config
+	l.Type = "Packages"
+	logp.Info("[PackagesInput] Initialized")
+	return nil
 }
 
 func (l *PackagesInput) GetConfig() inputs.MothershipConfig {
-  return l.Config
+	return l.Config
 }
 
 func (l *PackagesInput) Run(output chan common.MapStr) error {
-  logp.Debug("[PackagesInput]", "Running Packages Input")
+	logp.Debug("[PackagesInput]", "Running Packages Input")
 
-  // dispatch thread here
-  go inputs.PeriodicTaskRunner (l, output, l.doStuff, inputs.EmptyFunc, inputs.EmptyFunc)
+	// dispatch thread here
+	go inputs.PeriodicTaskRunner(l, output, l.doStuff, inputs.EmptyFunc, inputs.EmptyFunc)
 
-  return nil
+	return nil
 }
 
 func (l *PackagesInput) doStuff(output chan common.MapStr) {
 
-  now := func() time.Time {
-    t := time.Now()
-    return t
-  }
+	now := func() time.Time {
+		t := time.Now()
+		return t
+	}
 
-  // construct event and write it to channel
-  event := common.MapStr{}
+	// construct event and write it to channel
+	event := common.MapStr{}
 
-  //text := "null event"
-  //event["message"] = &text
+	//text := "null event"
+	//event["message"] = &text
 
-  event["message"]  = "packages event"
-  event["type"]     = l.Type
+	event["message"] = "packages event"
+	event["type"] = l.Type
 
-  event.EnsureTimestampField(now)
-  event.EnsureCountField()
+	event.EnsureTimestampField(now)
+	event.EnsureCountField()
 
+	/////////////
+	cmd := exec.Command("/bin/rpm", "-qa", "--queryformat", "%{NAME}:::%{VERSION}:::%{ARCH}##")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		logp.Info("Error occurred")
+		return
+	}
 
-  /////////////
-  cmd := exec.Command("/bin/rpm", "-qa", "--queryformat", "%{NAME}:::%{VERSION}:::%{ARCH}##")
-  var out bytes.Buffer
-  cmd.Stdout = &out
-  err := cmd.Run()
-  if err != nil {
-    logp.Info("Error occurred")
-    return
-  }
+	items := strings.Split(out.String(), "##")
+	rpmList := make([]RPMPackage, 0)
 
-  items := strings.Split(out.String(),"##")
-  rpmList := make([]RPMPackage, 0)
+	for _, line := range items {
+		item := strings.Split(line, ":::")
+		if len(item) < 3 {
+			continue
+		}
 
-  for _, line := range items {
-    item := strings.Split(line, ":::")
-    if len(item) < 3{
-      continue
-    }
+		pkg := RPMPackage{
+			Name:    item[0],
+			Version: item[1],
+			Arch:    item[2],
+		}
 
-    pkg := RPMPackage {
-              Name: item[0],
-              Version: item[1],
-              Arch: item[2],
-            }
+		rpmList = append(rpmList, pkg)
+	}
 
-    rpmList = append(rpmList, pkg)
-  }
-
-  event["packages"] = rpmList
-  output <- event
+	event["packages"] = rpmList
+	output <- event
 
 }
