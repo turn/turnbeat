@@ -25,18 +25,18 @@ output:
 
   kafka:
     enabled: false
-    host: "localhost:9092"
+    host: "localhost"
     topic: "pipeline-input"
 
   file:
-    enabled: true
+    enabled: false
     path: "/var/log"
     filename: turnbeat
     rotate_every_kb: 1000
     number_of_files: 2
 
   stdout:
-    enabled: false
+    enabled: true
 
 filter:
 #  filters: ["nop", "opentsdb"]
@@ -54,14 +54,9 @@ input:
     major_interval: 900
 
   syslog:
-    enabled: false
+    enabled: true
     port: 1514
     type: "syslog"
-
-  syslog_2:
-    enabled: false
-    port: 1515
-    type: "syslog-net"
 
   tail_1:
     enabled: true
@@ -74,17 +69,8 @@ input:
     enabled: false
     sleep_interval: 30
 
-# null input, sample code  
-  null_0:
-    enabled: false
-
   tcp:
     enabled: false
-    port: 3845
-    type: "tcollector"
-
-  tcp_2:
-    enabled: true
     port: 3846
-    type: "other"
+    type: "tcollector"
 
