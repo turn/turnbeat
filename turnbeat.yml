@@ -53,8 +53,13 @@ input:
     minor_interval: 60
     major_interval: 900
 
-  syslog:
+  udp_1:
     enabled: true
+    port: 3846
+    type: "tcollector"
+
+  syslog:
+    enabled: false
     port: 1514
     type: "syslog"
 
