@@ -40,7 +40,7 @@ output:
 
 filter:
 #  filters: ["nop", "opentsdb"]
-  filters: []
+  filters: ["opentsdb", "jsonexpander"]
 ############################# Input #############################################
 
 # Configure what inputs to use when collecting data with turnbeat.
