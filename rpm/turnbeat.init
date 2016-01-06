@@ -1,17 +1,25 @@
 #!/bin/sh
+# turnbeat:     basic startup script for turnbeat
 #
-# turnbeat:	basic startup script for turnbeat
+# /etc/init.d/turnbeat
+# Subsystem file for "Turnbeat" server
 #
-# chkconfig: - 2345 15 85
-# description:  monitoring agent
+# chkconfig: 2345 15 85 (1)
+# description: Turnbeat Daemon
+#
+# config: /etc/turnbeat.yml
 # processname:  /usr/local/turnbeat/turnbeat
-# config:       /etc/turnbeat.yml
 
 . /etc/rc.d/init.d/functions
 RETVAL=0
+
 conf=/etc/turnbeat.yml
 prog=/usr/local/turnbeat/turnbeat
 lockfile=/var/lock/subsys/turnbeat
+
+if [ -f /etc/sysconfig/turnbeat ] ; then
+        . /etc/sysconfig/turnbeat
+fi
 
 start() {
         echo -n $"Starting $prog: "
