@@ -89,7 +89,7 @@ func(l *UdpInput) handlePacket(buffer []byte, rlen int, count int, source *net.U
 	event["source"] = &source
 	event["offset"] = rlen
 	event["line"] = count
-	event["message"] = text
+	event["message"] = &text
 	event["type"] = l.Type
 
 	event.EnsureTimestampField(now)
